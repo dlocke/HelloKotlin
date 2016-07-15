@@ -3,7 +3,8 @@ import java.util.PriorityQueue
 import kotlin.system.exitProcess
 
 /* The wallet data structure holds a collection of bills */
-/* NOTE: This is separate from the Register class so that Wallets can be passed as parameters to the Register */
+/* NOTE: This is separate from the Register class so that Wallets can be passed
+    as parameters to the Register */
 data class Wallet(val twenties: Int = 0,
                     val tens: Int = 0,
                     val fives: Int = 0,
@@ -18,7 +19,8 @@ data class Wallet(val twenties: Int = 0,
         return "$$total $twenties $tens $fives $twos $ones"
     }
 
-    /* Return a new wallet that contains the contents of this wallet plus the contents of another wallet */
+    /* Return a new wallet that contains the contents of this wallet plus the
+        contents of another wallet */
     fun add(rvalue: Wallet): Wallet {
         return Wallet(twenties + rvalue.twenties,
                         tens + rvalue.tens,
@@ -27,7 +29,9 @@ data class Wallet(val twenties: Int = 0,
                         ones + rvalue.ones)
     }
 
-    /* Return a new wallet that contains the contents of this wallet minus the contents of another wallet.  Throw an error if the subtraction would leave the new wallet with a negative number of bills of any denomination */
+    /* Return a new wallet that contains the contents of this wallet minus the
+        contents of another wallet.  Throw an error if the subtraction would
+        leave the new wallet with a negative number of bills of any denomination */
     fun subtract(rvalue: Wallet): Wallet {
         val new_wallet = Wallet(twenties - rvalue.twenties,
                         tens - rvalue.tens,
@@ -46,7 +50,8 @@ data class Wallet(val twenties: Int = 0,
     }
 }
 
-/* The register class has a wallet (the register drawer and supports operations on that wallet */
+/* The register class has a wallet (the register drawer and supports operations
+    on that wallet */
 class Register (var drawer: Wallet) {
 
     /* Show the state of the register drawer */
@@ -70,7 +75,9 @@ class Register (var drawer: Wallet) {
     pick the largest possible bill won't work.  (Ex. $6 can be made as 5+1 or
     as 2+2+2 and if there's no one to add to the five, then we would say that
     we can't make change when we might actually be able to.  Using a breadth
-    first search would gaurntee that we'll get a correct answer, but that could end up checking a lot of possibilities that aren't usefull.  To get the best performance, I've implemented an A* search. */
+    first search would gaurntee that we'll get a correct answer, but that could
+    end up checking a lot of possibilities that aren't usefull.  To get the best
+    performance, I've implemented an A* search. */
     
     fun change(amount: Int) {
 
@@ -211,7 +218,8 @@ class Register (var drawer: Wallet) {
 
         /* Compare two search positions. We do the comparision by first
             checking the heuristic that we're using for the A* search
-            and then we break ties by checking the amount of change that still needs to be given. */
+            and then we break ties by checking the amount of change that still
+            needs to be given. */
         override fun compareTo(other: SearchPosition): Int {
             val our_heuristic = heuristic()
             val other_heuristic = other.heuristic()
