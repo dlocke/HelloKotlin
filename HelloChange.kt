@@ -1,7 +1,6 @@
 
-package change
-
 import java.util.PriorityQueue
+import kotlin.system.exitProcess
 
 /* The wallet data structure holds a collection of bills */
 /* NOTE: This is separate from the Register class so that Wallets can be passed as parameters to the Register */
@@ -35,8 +34,15 @@ data class Wallet(val twenties: Int = 0,
                         fives - rvalue.fives,
                         twos - rvalue.twos,
                         ones - rvalue.ones)
-        // TODO: Actually throw the excpetion
-        return new_wallet
+
+        when {
+            (new_wallet.twenties < 0) -> throw Throwable("Negative bills")
+            (new_wallet.tens < 0) -> throw Throwable("Negative bills")
+            (new_wallet.fives < 0) -> throw Throwable("Negative bills")
+            (new_wallet.twos < 0) -> throw Throwable("Negative bills")
+            (new_wallet.ones < 0) -> throw Throwable("Negative bills")
+            else -> return new_wallet
+        }
     }
 }
 
@@ -50,13 +56,11 @@ class Register (var drawer: Wallet) {
 
     /* Add money to the drawer */
     fun put(input: Wallet) {
-        println("Adding $input")
         drawer = drawer.add(input)
     }
 
     /* Remove money from the drawer */
     fun take(output: Wallet) {
-        println("Removing $output")
         drawer = drawer.subtract(output)
     }
 
@@ -69,7 +73,6 @@ class Register (var drawer: Wallet) {
     first search would gaurntee that we'll get a correct answer, but that could end up checking a lot of possibilities that aren't usefull.  To get the best performance, I've implemented an A* search. */
     
     fun change(amount: Int) {
-        println("Trying to make change for $amount")
 
         //Check to see if we're trying to make change for more than what is in the drawer.
         if (amount > drawer.total) {
@@ -84,7 +87,6 @@ class Register (var drawer: Wallet) {
 
         while (node_queue.any()) {
             val current_node = node_queue.remove()
-            println(current_node.amount.toString() + current_node.change)
 
             //Can we add a $20 bill to the change
             if (current_node.amount >= 20 && current_node.drawer.twenties >= 1) {
@@ -98,6 +100,7 @@ class Register (var drawer: Wallet) {
                 //Check to see if we've made exact change
                 if (new_amount == 0) {
                     take(new_change)
+                    println("${new_change.twenties} ${new_change.tens} ${new_change.fives} ${new_change.twos} ${new_change.ones}")
                     return
                 }
 
@@ -119,6 +122,7 @@ class Register (var drawer: Wallet) {
                 //Check to see if we've made exact change
                 if (new_amount == 0) {
                     take(new_change)
+                    println("${new_change.twenties} ${new_change.tens} ${new_change.fives} ${new_change.twos} ${new_change.ones}")
                     return
                 }
 
@@ -140,6 +144,7 @@ class Register (var drawer: Wallet) {
                 //Check to see if we've made exact change
                 if (new_amount == 0) {
                     take(new_change)
+                    println("${new_change.twenties} ${new_change.tens} ${new_change.fives} ${new_change.twos} ${new_change.ones}")
                     return
                 }
 
@@ -161,6 +166,7 @@ class Register (var drawer: Wallet) {
                 //Check to see if we've made exact change
                 if (new_amount == 0) {
                     take(new_change)
+                    println("${new_change.twenties} ${new_change.tens} ${new_change.fives} ${new_change.twos} ${new_change.ones}")
                     return
                 }
 
@@ -182,6 +188,7 @@ class Register (var drawer: Wallet) {
                 //Check to see if we've made exact change
                 if (new_amount == 0) {
                     take(new_change)
+                    println("${new_change.twenties} ${new_change.tens} ${new_change.fives} ${new_change.twos} ${new_change.ones}")
                     return
                 }
 
@@ -191,8 +198,11 @@ class Register (var drawer: Wallet) {
                     node_queue.add(new_node)
                 }
             }
-        }
-        
+        } // End while
+
+        //If we got this far then we can't make change for the requested amount
+        println("sorry")
+        return
     }
 
     private class SearchPosition(val amount: Int,
@@ -245,32 +255,74 @@ class Register (var drawer: Wallet) {
 }
 
 fun main(args: Array<String>) {
+
+    //Initalize the register and then let the user know that we're ready for input
+    val myRegister = Register(Wallet(1, 2, 3, 4, 5))
     println("ready")
 
-    val myRegister = Register(Wallet(1, 2, 3, 4, 5))
-    println(myRegister.show())
+    //Enter an infinite loop for user input while until "quit" is specified.
+    while (true) {
 
-    myRegister.put(Wallet(1, 2, 3, 0, 5))
-    println(myRegister.show())
+        print("> ")
+        var input = readLine()
 
-    myRegister.take(Wallet(1, 4, 3, 0, 10))
-    println(myRegister.show())
+        //Convert a null value (from EOF) into quit
+        input = input ?: "quit"
 
-    myRegister.change(11)
-    println(myRegister.show())
+        //Split the input into words
+        val input_words = input.split(" ")
 
-    myRegister.change(14)
-    println(myRegister.show())
-
-    //var input = readLine()
-    //println(input)
-
-/* TODO: Implement these
-
-show - display contents
-put - add bills
-take - remove bills
-change - make change, error is "sorry"
-quit - exit
-*/
+        //We'll be generous when accepting commands, "show" works just as well as "show me the money!"
+        when (input_words[0]) {
+            "show" -> {
+                println(myRegister.show())
+            }
+            "put" -> {
+                try {
+                    //Add money and then show the register
+                    myRegister.put(Wallet(input_words[1].toInt(),
+                                        input_words[2].toInt(),
+                                        input_words[3].toInt(),
+                                        input_words[4].toInt(),
+                                        input_words[5].toInt()))
+                    println(myRegister.show())
+                }
+                catch (e: Throwable) {
+                    println("Sorry, I don't understand how to do that")
+                }
+            }
+            "take" -> {
+                try {
+                    //Take money and then show the register
+                    myRegister.take(Wallet(input_words[1].toInt(),
+                                        input_words[2].toInt(),
+                                        input_words[3].toInt(),
+                                        input_words[4].toInt(),
+                                        input_words[5].toInt()))
+                    println(myRegister.show())
+                }
+                catch (e: Throwable) {
+                    println("Sorry, I don't understand how to do that")
+                }
+            }
+            "change" -> {
+                try {
+                    //Make change and remove it, but don't show the register
+                    myRegister.change(input_words[1].toInt())
+                }
+                catch (e: Throwable) {
+                    println("Sorry, I don't understand how to do that")
+                }
+            }
+            "quit" -> {
+                //Terminate program
+                println("Bye")
+                exitProcess(0)
+            }
+            else -> {
+                println("Sorry, I didn't understand that")
+                println("Valid commands are: show, put, take, change, quit")
+            }
+        }
+    }
 }
